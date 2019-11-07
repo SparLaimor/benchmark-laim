@@ -1,0 +1,53 @@
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+  
+<body>
+    <div id="main"></div>
+</body>
+
+<script src="dataset.js"></script>
+
+<script>
+    function divideArrays(array1, array2) {
+        let result = [];
+        for (let i = 0; i < array1.length; ++i) {
+            result.push(array1[i] / array2[i]);
+        }
+        return result;
+    }
+
+    function createElement(id) {
+        let mainElement = document.getElementById('main');
+        let div = document.createElement('div');
+        div.id = id;
+        mainElement.append(div);
+    }
+</script>
+
+<script>
+    function getSpeedUpData(array) {
+        const origin = array.shift();
+        array.forEach(e => {
+            e.y = divideArrays(origin.y, e.y);
+        });
+        return array;
+    }
+
+    benchmark.forEach(bench => {
+
+        bench.data.forEach(e => { e.y = e.y.map(e => e / 1000000) }); // to seconds
+
+        createElement(bench.benchmarkName);
+        Plotly.newPlot(bench.benchmarkName, bench.data, 
+            {title: bench.benchmarkName, xaxis: {title: bench.parameterName}, yaxis: { title: 'Avg Time (sec)'}}, 
+            {showSendToCloud: true});
+
+        createElement(bench.benchmarkName + 'SpeedUp');
+        Plotly.newPlot(bench.benchmarkName + 'SpeedUp', getSpeedUpData(bench.data), 
+            {title: bench.benchmarkName + ' Speed Up', xaxis: {title: bench.parameterName}, yaxis: { title: 'Speed Up'}}, 
+            {showSendToCloud: true});
+        
+    });
+
+</script>
